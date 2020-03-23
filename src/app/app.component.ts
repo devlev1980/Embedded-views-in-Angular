@@ -1,34 +1,55 @@
-import {AfterViewInit, Component, EmbeddedViewRef, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
-import {NgClass} from "@angular/common";
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy, ChangeDetectorRef,
+    Component,
+    TemplateRef,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
+import {IUser, users} from "../assets/users";
+
 
 @Component({
     selector: 'app-root',
     template: `
-        <h1 class="display-1">View Container in Angular / Rendering Logic </h1>
-        <!--        <div #container></div>-->
-        
-        <ng-container #container></ng-container>
-        
-        
-        <ng-template #templateRef>
-            <h3>Content in ng-template</h3>
+        <h1 class="display-1">ng-template / custom *ngFor</h1>
+
+        <ng-container #usersContainerRef></ng-container>
+        <ng-template #userTemplateRef 
+                     let-user="currentUser" 
+                     let-index="index" 
+                     let-isFirst="first">
+<!--            <h2>This is the users template</h2>-->
+            <h2>{{user.id}}  {{user.name}}</h2>
         </ng-template>
 
     `,
-    styles: []
+    styles: [],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements AfterViewInit {
-    @ViewChild(TemplateRef) template: TemplateRef<any>; // If there's just one ng-template no need to set reference like  in <ng-template #templateRef></ng-template>
-    @ViewChild('container',{read: ViewContainerRef}) container: ViewContainerRef;
+    @ViewChild('userTemplateRef', {read: TemplateRef}) userTemplate: TemplateRef<{currentUser: IUser,index: number, first: boolean}>;
+    @ViewChild('usersContainerRef', {read: ViewContainerRef}) usersContainerRef: ViewContainerRef
+    users: IUser[] = users;
 
-    // constructor(private viewContainer: ViewContainerRef) {
-    // }
-
+    constructor(private cdr: ChangeDetectorRef) {
+    }
     ngAfterViewInit(): void {
-        // const embeddedView: EmbeddedViewRef<any> = this.template.createEmbeddedView(null);
-        //
-        // this.container.insert(embeddedView);
-        this.container.createEmbeddedView(this.template); // Short version of code above
+
+        // this.users.forEach(user=>{
+        //     this.usersContainerRef.createEmbeddedView(this.userTemplate,{currentUser: user});
+        // })
+
+        for (let i=0; i< this.users.length; i++){
+           this.usersContainerRef.createEmbeddedView(this.userTemplate,{
+               currentUser: this.users[i],
+               index: i,
+               first: i == 0
+           })
+        }
+        this.cdr.detectChanges();
+
+
     }
 
 
