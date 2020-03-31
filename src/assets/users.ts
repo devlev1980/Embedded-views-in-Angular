@@ -16,7 +16,7 @@ export const users: IUser[] = [
         age: 22
     },
     {
-        id: 0,
+        id: 2,
         name: 'Nir',
         age: 25
     },
